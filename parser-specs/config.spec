@@ -40,6 +40,7 @@ state INITIAL:
   'assign'                                 -> ASSIGN
   'no_focus'                               -> NO_FOCUS
   'focus_follows_mouse'                    -> FOCUS_FOLLOWS_MOUSE
+  'mouse_follows_focus'                    -> MOUSE_FOLLOWS_FOCUS
   'mouse_warping'                          -> MOUSE_WARPING
   'focus_wrapping'                         -> FOCUS_WRAPPING
   'force_focus_wrapping'                   -> FORCE_FOCUS_WRAPPING
@@ -259,6 +260,11 @@ state CRITERION_STR:
 state FOCUS_FOLLOWS_MOUSE:
   value = word
       -> call cfg_focus_follows_mouse($value)
+
+# mouse_follows_focus bool
+state MOUSE_FOLLOWS_FOCUS:
+  value = word
+      -> call cfg_mouse_follows_focus($value)
 
 # mouse_warping warping_t
 state MOUSE_WARPING:
