@@ -142,3 +142,7 @@ void x_mask_event_mask(uint32_t mask);
  * Enables or disables nonrectangular shape of the container frame.
  */
 void x_set_shape(Con *con, xcb_shape_sk_t kind, bool enable);
+
+void x_center_mouse_on_focused();
+
+void x_mouse_moving();

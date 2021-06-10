@@ -9,6 +9,7 @@
  */
 
 #include "all.h"
+#include "x.h"
 #include "yajl_utils.h"
 
 #include <ev.h>
@@ -234,6 +235,11 @@ IPC_HANDLER(run_command) {
 
     if (result->needs_tree_render)
         tree_render();
+    if (result->needs_mouse_move)
+        x_center_mouse_on_focused();
+    if (result->needs_tree_render && !result->needs_mouse_move) {
+        LOG("WTF?");
+    }
 
     command_result_free(result);
 

@@ -33,6 +33,8 @@ struct CommandResultIR {
 
     /* Whether the command requires calling tree_render. */
     bool needs_tree_render;
+
+    bool needs_mouse_move;
 };
 
 typedef struct CommandResult CommandResult;
@@ -48,6 +50,7 @@ struct CommandResult {
     /* the error_message is currently only set for parse errors */
     char *error_message;
     bool needs_tree_render;
+    bool needs_mouse_move;
 };
 
 /**

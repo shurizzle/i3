@@ -9,6 +9,8 @@
  */
 #include "all.h"
 #include "shmlog.h"
+#include "tree.h"
+#include "x.h"
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -318,6 +320,7 @@ void cmd_move_con_to_workspace(I3_CMD, const char *which) {
 
     move_matches_to_workspace(ws);
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -338,6 +341,7 @@ void cmd_move_con_to_workspace_back_and_forth(I3_CMD) {
 
     move_matches_to_workspace(ws);
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -365,6 +369,7 @@ void cmd_move_con_to_workspace_name(I3_CMD, const char *name, const char *no_aut
 
     move_matches_to_workspace(ws);
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -397,6 +402,7 @@ void cmd_move_con_to_workspace_number(I3_CMD, const char *which, const char *no_
 
     move_matches_to_workspace(ws);
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -478,6 +484,8 @@ static void cmd_resize_floating(I3_CMD, const char *direction_str, Con *floating
     if (floating_con->scratchpad_state == SCRATCHPAD_FRESH) {
         floating_con->scratchpad_state = SCRATCHPAD_CHANGED;
     }
+
+    cmd_output->needs_mouse_move = true;
 }
 
 static bool cmd_resize_tiling_direction(I3_CMD, Con *current, const char *direction, int px, int ppt) {
@@ -496,7 +504,9 @@ static bool cmd_resize_tiling_direction(I3_CMD, Con *current, const char *direct
          * preferred. */
         px = 0;
     }
-    return resize_neighboring_cons(first, second, px, ppt);
+    bool result = resize_neighboring_cons(first, second, px, ppt);
+    cmd_output->needs_mouse_move = true;
+    return result;
 }
 
 static bool cmd_resize_tiling_width_height(I3_CMD, Con *current, const char *direction, int px, double ppt) {
@@ -565,6 +575,8 @@ static bool cmd_resize_tiling_width_height(I3_CMD, Con *current, const char *dir
         LOG("child->percent after (%p) = %f\n", child, child->percent);
     }
 
+    cmd_output->needs_mouse_move = true;
+
     return true;
 }
 
@@ -613,6 +625,7 @@ void cmd_resize(I3_CMD, const char *way, const char *direction, long resize_px, 
         }
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -696,6 +709,7 @@ void cmd_resize_set(I3_CMD, long cwidth, const char *mode_width, long cheight, c
         }
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     ysuccess(success);
 }
@@ -836,6 +850,7 @@ void cmd_append_layout(I3_CMD, const char *cpath) {
     if (content == JSON_CONTENT_WORKSPACE)
         ipc_send_workspace_event("restored", parent, NULL);
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
 out:
     free(path);
@@ -1039,6 +1054,7 @@ void cmd_move_con_to_output(I3_CMD, const char *name) {
         had_error |= !con_move_to_output_name(current->con, name, true);
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     ysuccess(!had_error);
 }
@@ -1059,6 +1075,7 @@ void cmd_move_con_to_mark(I3_CMD, const char *mark) {
         result &= con_move_to_mark(current->con, mark);
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     ysuccess(result);
 }
@@ -1089,6 +1106,7 @@ void cmd_floating(I3_CMD, const char *floating_mode) {
         }
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1158,6 +1176,7 @@ void cmd_split(I3_CMD, const char *direction) {
         }
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1190,6 +1209,7 @@ void cmd_kill(I3_CMD, const char *kill_mode_str) {
         con_close(current->con, kill_mode);
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1272,6 +1292,7 @@ void cmd_focus_direction(I3_CMD, const char *direction_str) {
         tree_next(current->con, direction);
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1307,6 +1328,7 @@ void cmd_focus_sibling(I3_CMD, const char *direction_str) {
         }
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1342,6 +1364,7 @@ void cmd_focus_window_mode(I3_CMD, const char *window_mode) {
     }
 
     if (success) {
+        cmd_output->needs_mouse_move = true;
         cmd_output->needs_tree_render = true;
         ysuccess(true);
     } else {
@@ -1372,6 +1395,7 @@ void cmd_focus_level(I3_CMD, const char *level) {
     else
         success = level_down();
 
+    cmd_output->needs_mouse_move = success;
     cmd_output->needs_tree_render = success;
     // XXX: default reply for now, make this a better reply
     ysuccess(success);
@@ -1419,6 +1443,7 @@ void cmd_focus(I3_CMD) {
         con_activate_unblock(current->con);
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     ysuccess(true);
 }
@@ -1446,6 +1471,7 @@ void cmd_fullscreen(I3_CMD, const char *action, const char *fullscreen_mode) {
         }
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1537,6 +1563,8 @@ void cmd_move_direction(I3_CMD, const char *direction_str, long amount, const ch
         con_activate(initially_focused);
     }
 
+    cmd_output->needs_mouse_move = true;
+
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
 }
@@ -1567,6 +1595,7 @@ void cmd_layout(I3_CMD, const char *layout_str) {
         con_set_layout(current->con, layout);
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1594,6 +1623,7 @@ void cmd_layout_toggle(I3_CMD, const char *toggle_mode) {
         }
     }
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
@@ -1719,6 +1749,7 @@ void cmd_focus_output(I3_CMD, const char *name) {
 
     workspace_show(ws);
 
+    cmd_output->needs_mouse_move = true;
     cmd_output->needs_tree_render = true;
     ysuccess(true);
 }
@@ -1758,8 +1789,10 @@ void cmd_move_window_to_position(I3_CMD, long x, const char *mode_x, long y, con
         }
     }
 
-    if (!has_error)
+    if (!has_error) {
+        cmd_output->needs_mouse_move = true;
         ysuccess(true);
+    }
 }
 
 /*
@@ -1800,6 +1833,8 @@ void cmd_move_window_to_center(I3_CMD, const char *method) {
             cmd_output->needs_tree_render = true;
         }
     }
+
+    cmd_output->needs_mouse_move = true;
 
     // XXX: default reply for now, make this a better reply
     if (!has_error)
@@ -2115,6 +2150,8 @@ void cmd_bar_mode(I3_CMD, const char *bar_mode, const char *bar_id) {
             return;
         }
     }
+
+    cmd_output->needs_mouse_move = true;
 
     if (bar_id) {
         /* We are looking for a specific bar and we did not find it */

@@ -9,6 +9,7 @@
  *
  */
 #include "all.h"
+#include "x.h"
 
 #include <sys/time.h>
 #include <time.h>
@@ -107,6 +108,7 @@ static void check_crossing_screen_boundary(uint32_t x, uint32_t y) {
     /* Focus the output on which the user moved their cursor */
     Con *old_focused = focused;
     Con *next = con_descend_focused(output_get_content(output->con));
+    x_mouse_moving();
     /* Since we are switching outputs, this *must* be a different workspace, so
      * call workspace_show() */
     workspace_show(con_get_workspace(next));
@@ -176,6 +178,8 @@ static void handle_enter_notify(xcb_enter_notify_event_t *event) {
     if (con == focused)
         return;
 
+    x_mouse_moving();
+
     /* Get the currently focused workspace to check if the focus change also
      * involves changing workspaces. If so, we need to call workspace_show() to
      * correctly update state and send the IPC event. */
@@ -225,6 +229,7 @@ static void handle_motion_notify(xcb_motion_notify_event_t *event) {
         if (TAILQ_FIRST(&(con->focus_head)) == current)
             return;
 
+        x_mouse_moving();
         con_focus(current);
         x_push_changes(croot);
         return;
