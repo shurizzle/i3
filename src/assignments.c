@@ -8,6 +8,7 @@
  *
  */
 #include "all.h"
+#include "x.h"
 
 /*
  * Checks the list of assignments for the given window and runs all matching
@@ -17,6 +18,7 @@
 void run_assignments(i3Window *window) {
     DLOG("Checking if any assignments match this window\n");
 
+    bool needs_mouse_move = false;
     bool needs_tree_render = false;
 
     /* Check if any assignments match */
@@ -51,6 +53,8 @@ void run_assignments(i3Window *window) {
         CommandResult *result = parse_command(full_command, NULL, NULL);
         free(full_command);
 
+        if (result->needs_mouse_move)
+            needs_mouse_move = true;
         if (result->needs_tree_render)
             needs_tree_render = true;
 
@@ -60,6 +64,8 @@ void run_assignments(i3Window *window) {
     /* If any of the commands required re-rendering, we will do that now. */
     if (needs_tree_render)
         tree_render();
+    if (needs_mouse_move)
+        x_center_mouse_on_focused();
 }
 
 /*

@@ -7,6 +7,7 @@
  * bindings.c: Functions for configuring, finding and, running bindings.
  */
 #include "all.h"
+#include "x.h"
 
 #include <math.h>
 
@@ -848,6 +849,8 @@ CommandResult *run_binding(Binding *bind, Con *con) {
 
     if (result->needs_tree_render)
         tree_render();
+    if (result->needs_mouse_move)
+        x_center_mouse_on_focused();
 
     if (result->parse_error) {
         char *pageraction;

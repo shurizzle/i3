@@ -157,9 +157,12 @@ static void next_state(const cmdp_token *token) {
     if (token->next_state == __CALL) {
         subcommand_output.json_gen = command_output.json_gen;
         subcommand_output.client = command_output.client;
+        subcommand_output.needs_mouse_move = false;
         subcommand_output.needs_tree_render = false;
         GENERATED_call(&current_match, &stack, token->extra.call_identifier, &subcommand_output);
         state = subcommand_output.next_state;
+        if (subcommand_output.needs_mouse_move)
+            command_output.needs_mouse_move = true;
         /* If any subcommand requires a tree_render(), we need to make the
          * whole parser result request a tree_render(). */
         if (subcommand_output.needs_tree_render)
@@ -248,6 +251,7 @@ CommandResult *parse_command(const char *input, yajl_gen gen, ipc_client *client
     command_output.json_gen = gen;
 
     y(array_open);
+    command_output.needs_mouse_move = false;
     command_output.needs_tree_render = false;
 
     const char *walk = input;
@@ -428,6 +432,7 @@ CommandResult *parse_command(const char *input, yajl_gen gen, ipc_client *client
 
     y(array_close);
 
+    result->needs_mouse_move = command_output.needs_mouse_move;
     result->needs_tree_render = command_output.needs_tree_render;
     return result;
 }
